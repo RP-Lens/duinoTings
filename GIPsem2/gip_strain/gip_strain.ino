@@ -46,6 +46,8 @@ void loop() {
 
   //scale.get_units();
   //returns a float, sends to serial monitor
+  Serial.print(ang);
+  Serial.print(',');
   Serial.print(scale.get_units());
   Serial.println(',');
   delay(100);
