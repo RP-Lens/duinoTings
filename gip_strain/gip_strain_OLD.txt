@@ -1,0 +1,73 @@
+//Load cell amp and servo libraries
+#include <HX711.h>
+#include <Servo.h>
+
+//HX711 and servo objects
+HX711 scale;
+Servo servo;
+
+//Input pins on arduino from load cell amp
+#define BTN  7
+#define DAT  3
+#define CLK  2
+
+//This value is obtained using the SparkFun_HX711_Calibration sketch
+#define calibration_factor -7050.0 
+
+//variables for servo control
+int ang = 135;
+int dir = 1;
+bool servoOn = false;
+
+
+void setup() {
+  Serial.begin(9600);
+
+  pinMode(DAT, INPUT);
+  pinMode(CLK, INPUT);
+
+  //set scale pins
+  scale.begin(DAT, CLK);
+  scale.set_scale(calibration_factor); 
+
+  //Assuming there is no weight on the scale at start up, reset the scale to 0
+  scale.tare();	
+
+  //Set servo object to pin 9 and set angle
+  servo.attach(9);
+  servo.write(135);
+}
+
+void loop() {
+  scale.get_units();
+  //returns a float, sends to serial monitor
+  Serial.println(scale.get_units() * -1, 1);
+
+  //Activate servo if button is pressed
+  if (digitalRead(BTN))
+  {
+    servoOn = true;
+  }
+
+  //Turn between 90 and 135 degrees
+  if (servoOn)
+  {
+    //step angle by +/-1 and write to motor
+    ang -= dir;
+    servo.write(ang);
+
+    //Change direction if angle is 135
+    if (ang <= 45)
+    {
+      dir = -dir;
+    }
+    //If angle returns to 90, deactivate arduino
+    if (ang >= 135)
+    {
+      servoOn = false;
+      dir = -dir;
+    }
+  }
+  //Serial.println(ang);
+  delay(15);
+}
